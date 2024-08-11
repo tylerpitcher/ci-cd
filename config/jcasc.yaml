@@ -1,0 +1,73 @@
+jenkins:
+  numExecutors: 2
+  securityRealm:
+    github:
+      clientID: "${GITHUB_CLIENT_ID}"
+      clientSecret: "${GITHUB_CLIENT_SECRET}"
+      githubApiUri: "https://api.github.com"
+      githubWebUri: "https://github.com"
+      oauthScopes: "read:org,user:email,repo"
+  authorizationStrategy:
+    globalMatrix:
+      entries:
+      - user:
+          name: "${GITHUB_USERNAME}"
+          permissions:
+          - "Overall/Administer"
+  globalNodeProperties:
+  - envVars:
+      env:
+      - key: "GIT_AUTHOR_NAME"
+        value: "${GIT_NAME}"
+      - key: "GIT_AUTHOR_EMAIL"
+        value: "${GIT_EMAIL}"
+      - key: "GIT_COMMITTER_NAME"
+        value: "${GIT_NAME}"
+      - key: "GIT_COMMITTER_EMAIL"
+        value: "${GIT_EMAIL}"
+
+security:
+  globalJobDslSecurityConfiguration:
+    useScriptSecurity: true
+  scriptApproval:
+    approvedSignatures:
+    - "method java.net.URLConnection getInputStream"
+    - "method java.net.URLConnection setRequestProperty java.lang.String java.lang.String"
+    - "method java.net.http.HttpClient send java.net.http.HttpRequest java.net.http.HttpResponse$BodyHandler"
+    - "method java.net.http.HttpRequest$Builder build"
+    - "method java.net.http.HttpRequest$Builder header java.lang.String java.lang.String"
+    - "method java.net.http.HttpRequest$Builder uri java.net.URI"
+    - "method java.net.http.HttpResponse body"
+    - "staticMethod java.net.URI create java.lang.String"
+    - "staticMethod java.net.http.HttpClient newHttpClient"
+    - "staticMethod java.net.http.HttpRequest newBuilder"
+    - "staticMethod java.net.http.HttpResponse$BodyHandlers ofString"
+    - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods getText java.io.InputStream"
+
+credentials:
+  system:
+    domainCredentials:
+    - credentials:
+      - string:
+          scope: GLOBAL
+          id: "github-token"
+          secret: "${GITHUB_TOKEN}"
+          description: "Personal GitHub token"
+    - credentials:
+      - usernamePassword:
+          scope: GLOBAL
+          id: "github-username-token"
+          username: "${GITHUB_USERNAME}"
+          password: "${GITHUB_TOKEN}"
+          description: "GitHub username and token"
+    - credentials:
+      - usernamePassword:
+          scope: GLOBAL
+          id: "dockerhub"
+          username: "${DOCKER_USERNAME}"
+          password: "${DOCKER_TOKEN}"
+          description: "Personal docker token"
+
+unclassified:
+  location:
+    url: ${HOST}

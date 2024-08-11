@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  jenkins:
+    build:
+      dockerfile: Dockerfile
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - /tmp/jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - CASC_JENKINS_CONFIG=/usr/share/jenkins/ref/casc.yaml
+      - HOST=${HOST}
+      - GITHUB_USERNAME=${GITHUB_USERNAME}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - DOCKER_USERNAME=${DOCKER_USERNAME}
+      - DOCKER_TOKEN=${DOCKER_TOKEN}
+      - GIT_AUTHOR_NAME=${GIT_AUTHOR_NAME}
+      - GIT_AUTHOR_EMAIL=${GIT_AUTHOR_EMAIL}
+      - GIT_COMMITTER_NAME=${GIT_COMMITTER_NAME}
+      - GIT_COMMITTER_EMAIL${GIT_COMMITTER_EMAIL}
+
+
+volumes:
+  jenkins_home:
