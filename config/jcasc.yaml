@@ -71,3 +71,21 @@ credentials:
 unclassified:
   location:
     url: ${HOST}
+
+jobs:
+  - script: >
+      pipelineJob("Seed") {
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url("https://github.com/tylerpitcher/jenkins.git")
+                }
+                branch("*/main")
+              }
+            }
+            scriptPath("jobs/seed.groovy")
+          }
+        }
+      }
