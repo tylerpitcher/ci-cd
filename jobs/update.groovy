@@ -7,11 +7,11 @@ pipeline {
         git url: "${params.repository}", branch: "main"
       }
     }
-    stage('Update Manifest') {
+    stage("Update Manifest") {
       steps {
         script {
-          withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-            withCredentials([usernamePassword(credentialsId: 'github-username-token', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+          withCredentials([usernamePassword(credentialsId: "dockerhub", usernameVariable: "DOCKER_USERNAME", passwordVariable: "DOCKER_PASSWORD")]) {
+            withCredentials([usernamePassword(credentialsId: "github-username-token", usernameVariable: "GIT_USERNAME", passwordVariable: "GIT_PASSWORD")]) {
               // Display the content of the manifest
               sh "cat manifests/${params.imageName}.yaml"
 

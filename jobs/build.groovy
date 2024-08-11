@@ -23,14 +23,14 @@ pipeline {
         }
       }
     }
-    stage('Trigger SG.Update-Manifest') {
+    stage("Trigger SG.Update-Manifest") {
       steps {
         echo "Triggering SG.Update-Manifest"
-        build job: 'SG.Update-Manifest', parameters: [
-          string(name: 'repositoryName', value: params.repositoryName),
-          string(name: 'repository', value: params.repository),
-          string(name: 'imageName', value: params.imageName),
-          string(name: 'dockertag', value: env.commitHash)
+        build job: "SG.Update-Manifest", parameters: [
+          string(name: "repositoryName", value: params.repositoryName),
+          string(name: "repository", value: params.repository),
+          string(name: "imageName", value: params.imageName),
+          string(name: "dockertag", value: env.commitHash)
         ]
       }
     }
