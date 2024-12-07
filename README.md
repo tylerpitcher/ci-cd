@@ -1,4 +1,4 @@
-# My Build Jenkins
+# My CI/CD
 This repository contains the configurations and scripts for a custom Jenkins setup to build Docker images and update manifest files. The setup leverages Jenkins pipelines, Job DSL, and Jenkins Configuration as Code (JCasC).
 
 ## How to Run
