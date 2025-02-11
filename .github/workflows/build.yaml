@@ -3,10 +3,16 @@ name: Docker Build and Publish
 on:
   workflow_call:
     inputs:
-      dockerfile_path:
+      image_name:
+        description: 'Docker image name'
         required: true
         type: string
-      image_name:
+      image_version:
+        description: 'Docker image version'
+        required: true
+        type: string
+      dockerfile_path:
+        description: 'Path to Dockerfile'
         required: true
         type: string
     secrets:
@@ -33,10 +39,9 @@ jobs:
 
       - name: Build and Publish Image
         run: |
-          COMMIT_HASH=$(echo ${{ github.sha }} | cut -c1-7)
           docker buildx build \
             --platform linux/amd64,linux/arm64 \
             --push \
             -t ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:latest \
-            -t ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${COMMIT_HASH} \
+            -t ${{ secrets.DOCKER_USERNAME }}/${{ inputs.image_name }}:${{ inputs.image_version }} \
             -f ${{ inputs.dockerfile_path }} .
