@@ -1,0 +1,82 @@
+name: Update Release Notes
+
+on:
+  workflow_call:
+    secrets:
+      GIT_PAT:
+        required: true
+
+jobs:
+  update-release-notes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt update
+          sudo apt install -y curl
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg |
+            sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" |
+            sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+
+      - name: Authenticate GitHub CLI
+        run: echo "${{ secrets.GIT_PAT }}" | gh auth login --with-token
+
+      - name: Get Previous Tag
+        id: previous_release
+        run: |
+          prev_tag=$(gh release list --limit 2 | tail -n 1 | awk '{print $1}')
+          echo "previous_tag=$prev_tag" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GIT_PAT }}
+
+      - name: Get Commits Between Releases
+        id: changelog
+        run: |
+          header="### Commit(s)"
+          commits=$(git log ${{ steps.previous_release.outputs.previous_tag }}..HEAD --pretty=format:"- %s (%h)")
+
+          if [ -z "$commits" ]; then
+            full_changelog="${header}\n_No changes since last release._"
+            has_changes="false"
+          else
+            full_changelog="${header}\n${commits}"
+            has_changes="true"
+          fi
+
+          echo "commits<<EOF" >> "$GITHUB_OUTPUT"
+          echo -e "$full_changelog" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+          echo "has_changes=$has_changes" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GIT_PAT }}
+
+      - name: Get Existing Release Notes
+        id: current_notes
+        run: |
+          notes=$(gh release view "${{ github.event.release.tag_name }}" --json body -q ".body")
+          echo "body<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$notes" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GIT_PAT }}
+
+      - name: Update Release Notes (Append Changelog)
+        run: |
+          echo "${{ steps.current_notes.outputs.body }}" > release_notes.md
+          echo -e "\n\n${{ steps.changelog.outputs.commits }}" >> release_notes.md
+
+          gh release edit "${{ github.event.release.tag_name }}" --notes-file release_notes.md
+        env:
+          GH_TOKEN: ${{ secrets.GIT_PAT }}
