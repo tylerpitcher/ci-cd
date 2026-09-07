@@ -41,6 +41,8 @@ jobs:
 
           mkdir -p dist
 
+          helm dependency update
+
           helm package . \
             --version "$VERSION" \
             --destination dist
